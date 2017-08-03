@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+<meta name="theme-color" content="#4d90fe">
+<link rel="manifest" href="<%= require('../../assets/manifest.json') %>">
+<script type="application/javascript" src="<%= require('file-loader?name=[name].[ext]!../../libs/inflate.min.js') %>"></script>
+<script type="application/javascript" src="<%= require('file-loader?name=[name].[ext]!../../libs/webdnn.js') %>"></script>
+</head>
+<body>
+<div id="root"></div>
+</body>
+</html>

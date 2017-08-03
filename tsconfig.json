@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"noImplicitAny": true,
+		"removeComments": true,
+		"strictNullChecks": true,
+		"target": "es5",
+		"jsx": "react",
+		"inlineSourceMap": false,
+		"sourceMap": false,
+		"lib": [
+			"es6",
+			"dom"
+		]
+	}
+}
