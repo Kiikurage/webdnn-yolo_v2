@@ -45,11 +45,16 @@ export default class App extends React.Component<{}, State> {
     }
 
     private onClick() {
-        this.setState({ running: !this.state.running });
+        if (this.state.running) {
+            this.setState({running: false});
 
-        if (this.requested) return;
-        this.requested = true;
-        requestAnimationFrame(() => this.run());
+        } else {
+            this.setState({running: true});
+
+            if (this.requested) return;
+            this.requested = true;
+            requestAnimationFrame(() => this.run());
+        }
     }
 
     private async initAsync() {
@@ -84,10 +89,11 @@ export default class App extends React.Component<{}, State> {
         this.$video.srcObject = stream;
         this.$video.play();
 
-        this.setState({ initialized: true });
+        this.setState({initialized: true});
     }
 
     private async run() {
+        if (!this.state.running) return;
         this.requested = false;
 
         let $input = this.$input;
@@ -122,10 +128,10 @@ export default class App extends React.Component<{}, State> {
             if (probability < DETECTION_THRESHOLD) continue;
 
             boxes.push({
-                x0: Math.round(Math.min(1, Math.max(0, x[i] - w[i] / 2)) * 448),
-                y0: Math.round(Math.min(1, Math.max(0, y[i] - h[i] / 2)) * 448),
-                x1: Math.round(Math.min(1, Math.max(0, x[i] + w[i] / 2)) * 448),
-                y1: Math.round(Math.min(1, Math.max(0, y[i] + h[i] / 2)) * 448),
+                x0: Math.round(Math.min(1, Math.max(0, x[i] - w[i] / 2)) * this.$video.videoWidth),
+                y0: Math.round(Math.min(1, Math.max(0, y[i] - h[i] / 2)) * this.$video.videoHeight),
+                x1: Math.round(Math.min(1, Math.max(0, x[i] + w[i] / 2)) * this.$video.videoWidth),
+                y1: Math.round(Math.min(1, Math.max(0, y[i] + h[i] / 2)) * this.$video.videoHeight),
                 conf: conf[i],
                 classId: maxK,
                 className: Labels[maxK],
@@ -135,9 +141,10 @@ export default class App extends React.Component<{}, State> {
         }
         boxes = nonMaximumSuppression(boxes);
 
+        this.$output.width = this.$video.videoWidth;
+        this.$output.height = this.$video.videoHeight;
         let context = $output.getContext('2d')!;
-        context.drawImage(this.$video, 0, 0, 448, 448);
-
+        context.drawImage(this.$video, 0, 0, this.$video.videoWidth, this.$video.videoHeight);
         context.font = '16px "sans-serif"';
         for (let box of boxes) {
             context.strokeStyle = Colors[box.classId % Colors.length];
@@ -161,15 +168,15 @@ export default class App extends React.Component<{}, State> {
     render() {
         return (
             <div className={style.app}>
-                <video ref="video" />
-                <canvas width="448" height="448" ref="input" style={{ display: 'none' }} />
-                <canvas width="448" height="448" ref="output" />
+                <video ref="video"/>
+                <canvas width="448" height="448" ref="input" style={{display: 'none'}}/>
+                <canvas ref="output"/>
                 <button disabled={!this.state.initialized} onClick={() => this.onClick()}>{
                     this.state.initialized ?
-                    this.state.running ?
-                    'STOP' :
-                    'RUN' :
-                    'INITIALIZING...'
+                        this.state.running ?
+                            'STOP' :
+                            'RUN' :
+                        'INITIALIZING...'
                 }</button>
             </div>
         );

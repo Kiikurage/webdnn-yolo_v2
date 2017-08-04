@@ -9372,11 +9372,16 @@ var App = (function (_super) {
     };
     App.prototype.onClick = function () {
         var _this = this;
-        this.setState({ running: !this.state.running });
-        if (this.requested)
-            return;
-        this.requested = true;
-        requestAnimationFrame(function () { return _this.run(); });
+        if (this.state.running) {
+            this.setState({ running: false });
+        }
+        else {
+            this.setState({ running: true });
+            if (this.requested)
+                return;
+            this.requested = true;
+            requestAnimationFrame(function () { return _this.run(); });
+        }
     };
     App.prototype.initAsync = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -9426,6 +9431,8 @@ var App = (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!this.state.running)
+                            return [2];
                         this.requested = false;
                         $input = this.$input;
                         $output = this.$output;
@@ -9455,10 +9462,10 @@ var App = (function (_super) {
                             if (probability < DETECTION_THRESHOLD)
                                 continue;
                             boxes.push({
-                                x0: Math.round(Math.min(1, Math.max(0, x[i] - w[i] / 2)) * 448),
-                                y0: Math.round(Math.min(1, Math.max(0, y[i] - h[i] / 2)) * 448),
-                                x1: Math.round(Math.min(1, Math.max(0, x[i] + w[i] / 2)) * 448),
-                                y1: Math.round(Math.min(1, Math.max(0, y[i] + h[i] / 2)) * 448),
+                                x0: Math.round(Math.min(1, Math.max(0, x[i] - w[i] / 2)) * this.$video.videoWidth),
+                                y0: Math.round(Math.min(1, Math.max(0, y[i] - h[i] / 2)) * this.$video.videoHeight),
+                                x1: Math.round(Math.min(1, Math.max(0, x[i] + w[i] / 2)) * this.$video.videoWidth),
+                                y1: Math.round(Math.min(1, Math.max(0, y[i] + h[i] / 2)) * this.$video.videoHeight),
                                 conf: conf[i],
                                 classId: maxK,
                                 className: Labels[maxK],
@@ -9467,8 +9474,10 @@ var App = (function (_super) {
                             });
                         }
                         boxes = nonMaximumSuppression(boxes);
+                        this.$output.width = this.$video.videoWidth;
+                        this.$output.height = this.$video.videoHeight;
                         context = $output.getContext('2d');
-                        context.drawImage(this.$video, 0, 0, 448, 448);
+                        context.drawImage(this.$video, 0, 0, this.$video.videoWidth, this.$video.videoHeight);
                         context.font = '16px "sans-serif"';
                         for (_i = 0, boxes_1 = boxes; _i < boxes_1.length; _i++) {
                             box = boxes_1[_i];
@@ -9496,7 +9505,7 @@ var App = (function (_super) {
         return (React.createElement("div", { className: style.app },
             React.createElement("video", { ref: "video" }),
             React.createElement("canvas", { width: "448", height: "448", ref: "input", style: { display: 'none' } }),
-            React.createElement("canvas", { width: "448", height: "448", ref: "output" }),
+            React.createElement("canvas", { ref: "output" }),
             React.createElement("button", { disabled: !this.state.initialized, onClick: function () { return _this.onClick(); } }, this.state.initialized ?
                 this.state.running ?
                     'STOP' :
